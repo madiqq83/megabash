@@ -1,0 +1,62 @@
+#!/bin/bash
+# mantotext
+# purpose of this bash shell script is to convert linux manual page \
+# from troff to plain ascii text file.
+#
+# Example usage:
+#  troff-to-ascii "/usr/share/man/man1/bash.1.gz" "$HOME/Documents/bash.1.txt"
+#
+# create sumadi <madiqq83@gmail.com> makassar 16-1-2025.
+
+error()
+{
+    echo -n "[error$1@$0]: "
+    case "$1"
+    in
+        0)  exit 0
+            ;;
+            
+        1)  echo "Maybe $X is empty ? " > "/dev/stderr";
+            exit 1
+            ;;
+            
+        2)  echo "$X is not troff ?" > "/dev/stderr";
+            exit 2
+            ;;
+            
+        3)  echo "Cannot create temporary file" > "/dev/stderr";
+            exit 3
+            ;;
+            
+        4)  echo "unknown problem ..." > "/dev/stderr";
+            exit 4
+            ;;
+            
+        5)  echo "Unknown problem ..." > "/dev/stderr";
+            exit 5
+            ;;
+    esac
+}
+
+IFS=$'\n'
+
+X=`realpath "$1"`
+if ! [[ -s "$X" ]]; then
+    error 1
+fi
+
+A=$(mktemp)
+if [[ "$A" == "" ]]; then
+    error 3
+fi
+
+if ! man "$X" | col -b > $A; then
+    rm "$A"
+    error 4
+fi
+
+if ! mv "$A" "$X"; then
+    error 5
+fi
+
+error 0
